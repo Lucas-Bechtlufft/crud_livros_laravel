@@ -129,55 +129,63 @@
             setTimeout(function() {
                 overlay.style.opacity = '0.8';
             }, 500);
+
+            // Função para exibir o pop-up de confirmação ao clicar no botão "Excluir"
+            var btnExcluir = document.getElementById('btexc');
+            btnExcluir.addEventListener('click', function(event) {
+                var confirmacao = confirm("Deseja realmente excluir o livro?");
+                if (!confirmacao) {
+                    event.preventDefault(); // Cancela o envio do formulário de exclusão
+                }
+            });
         });
     </script>
 </head>
 
-<body>
-    <h1>Lista de Livros</h1>
-    <div class="special-effects">
-        <img src="/img/biblioteca.jpg" alt="Imagem de fundo" />
-        <div class="overlay"></div>
-        <div class="content">
-            <h2>Bem-vindo à nossa biblioteca!</h2>
-            <p>Aqui você encontrará uma incrível seleção de livros.</p>
-            <a href="{{ route('livros.create') }}" class="btn btn-primary">Novo Livro</a>
-        </div>
+<h1>Lista de Livros</h1>
+<div class="special-effects">
+    <img src="/img/biblioteca.jpg" alt="Imagem de fundo" />
+    <div class="overlay"></div>
+    <div class="content">
+        <h2>Bem-vindo à nossa biblioteca!</h2>
+        <p>Aqui você encontrará uma incrível seleção de livros.</p>
+        <a href="{{ route('livros.create') }}" class="btn btn-primary">Novo Livro</a>
     </div>
+</div>
 
-    <table>
-        <thead>
+<table>
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Editora</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($livros as $livro)
             <tr>
-                <th>Título</th>
-                <th>Autor</th>
-                <th>Editora</th>
-                <th>Ações</th>
+                <td>{{ $livro->titulo }}</td>
+                <td>
+                    @if ($livro->autores->count() > 0)
+                        @foreach ($livro->autores as $autor)
+                            {{ $autor->nome }}
+                        @endforeach
+                    @else
+                        Autor desconhecido
+                    @endif
+                </td>
+                <td>{{ $livro->editora->nome }}</td>
+                <td>
+                    <a href="{{ route('livros.show', $livro->id) }}" class="btn btn-info">Detalhes</a>
+                    <a href="{{ route('livros.edit', $livro->id) }}" class="btn btn-primary">Editar</a>
+                    <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" style="display: inline">
+                        @csrf
+                        @method('DELETE')
+                        <button id="btexc" type="submit" class="btn btn-danger btn-excluir">Excluir</button>
+                    </form>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($livros as $livro)
-                <tr>
-                    <td>{{ $livro->titulo }}</td>
-                    <td>
-                        @if ($livro->autores->count() > 0)
-                            @foreach ($livro->autores as $autor)
-                                {{ $autor->nome }}
-                            @endforeach
-                        @else
-                            Autor desconhecido
-                        @endif
-                    </td>
-                    <td>{{ $livro->editora->nome }}</td>
-                    <td>
-                        <a href="{{ route('livros.show', $livro->id) }}" class="btn btn-info">Detalhes</a>
-                        <a href="{{ route('livros.edit', $livro->id) }}" class="btn btn-primary">Editar</a>
-                        <form action="{{ route('livros.destroy', $livro->id) }}" method="POST" style="display: inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Excluir</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+        @endforeach
+    </tbody>
+</table>
